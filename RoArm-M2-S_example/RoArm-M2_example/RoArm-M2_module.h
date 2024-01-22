@@ -62,14 +62,19 @@ void updateEndEffectorAngle() {
     double elbowAngle = calculateRadByFeedback(servoFeedback[ELBOW_SERVO_ID - 11].pos, ELBOW_JOINT);
 
     // 计算末端舵机的角度
-    double endEffectorAngle = M_PI - (shoulderAngle - elbowAngle); // 可能需要根据实际情况调整计算公式
+    double endEffectorAngle = M_PI + (-shoulderAngle - (elbowAngle - M_PI/2)); // 可能需要根据实际情况调整计算公式
 
     // 设置末端舵机的目标位置
-    RoArmM2_handJointCtrlRad(0, endEffectorAngle, 0.25, 1); // 可能需要调整速度和加速度参数
+    RoArmM2_handJointCtrlRad(0, endEffectorAngle, 0, 0); // 可能需要调整速度和加速度参数
 
-    // 打印末端舵机的角度
-    Serial.print("End Effector Angle: ");
-    Serial.println(endEffectorAngle);
+    // 打印舵机的角度
+    // Serial.print("Shoulder Angle: ");
+    // Serial.println(shoulderAngle * 180/M_PI);
+    // Serial.print("Elbow Angle: ");
+    // Serial.println(elbowAngle * 180/M_PI);
+
+    // Serial.print("End Effector Angle: ");
+    // Serial.println(endEffectorAngle * 180/M_PI);
 }
 
 // input the ID of the servo,
@@ -733,6 +738,7 @@ void RoArmM2_singleJointAbsCtrl(byte jointInput, double inputRad, u16 inputSpd, 
 //           |
 //           v
 void RoArmM2_allJointAbsCtrl(double inputBase, double inputShoulder, double inputElbow, double inputHand, u16 inputSpd, u8 inputAcc){
+  updateEndEffectorAngle();//发现有延迟，可能是角度的问题，但是多写一个update
   RoArmM2_baseJointCtrlRad(0, inputBase, inputSpd, inputAcc);
   RoArmM2_shoulderJointCtrlRad(0, inputShoulder, inputSpd, inputAcc);
   RoArmM2_elbowJointCtrlRad(0, inputElbow, inputSpd, inputAcc);

@@ -20,12 +20,16 @@ typedef struct hand_message {
   char megs[210];
 } hand_message;
 hand_message handData;
+
 // 机械爪发送数据
 typedef struct finger_message {
   char cmd[8];
   int arc;  //角度
 } finger_message;
 finger_message fingerData;
+
+
+
 esp_now_peer_info_t peerInfo;  //espnow参数
 
 //把摇杆模拟信号改为-8至8的整数
@@ -107,7 +111,9 @@ void send1(float arm0,float arm1,float arm2,float arm3){  //发送给机械臂
     Serial.println("Send Error");
   }
 }
-void send2(float arm4) { //发送给机械爪
+
+//发送给机械爪
+void send2(float arm4) { 
   strcpy(fingerData.cmd, "catch");
   fingerData.arc = arm4;
   esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &fingerData, sizeof(fingerData));
@@ -119,8 +125,10 @@ void send2(float arm4) { //发送给机械爪
     Serial.println("Send Error");
   }  
 }
-float arc=10;//0.2秒移动最大角度为2度
-float arcRate=arc*3.14/180; //0.2秒移动最大角度为2度，这个要根据实际调整
+
+
+float arc=10;//delay秒内移动最大角度
+float arcRate=arc*3.14/180; //转换成弧度制
 void loop() {
   int yValueSw = digitalRead(VRSw);  // 读取第一个遥感模块的按钮情况
   
@@ -161,7 +169,7 @@ void loop() {
         send1(arm[0],arm[1],arm[2],arm[3]);
 
     }
-    if( getControl[3] != 0){
+    else if( getControl[3] != 0){
       arm[4] += getControl[3] * arc/10;
       arm[4] = constrain(arm[4], armLimit[4][0], armLimit[4][1]);// 限制关节角度在设定范围内
       Serial.println(arm[4]);

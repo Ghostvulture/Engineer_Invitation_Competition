@@ -121,7 +121,7 @@ void OnDataRecv(const unsigned char* mac, const unsigned char* incomingData, int
   }
 
   memcpy(&espNowMegsRecv, incomingData, sizeof(espNowMegsRecv));
-  if (InfoPrint == 1) {
+  if (InfoPrint == 1 && espNowMegsRecv.T == 305) {
     Serial.print("Bytes received: ");Serial.println(len);
   }
 
