@@ -54,7 +54,9 @@ double calculateRadByFeedback(int inputSteps, int jointName) {
   }
   return getRad;
 }
+
 //加入，为了让末端保持水平*****************************************************
+int RoArmM2_handJointCtrlRad(byte returnType, double radInput, u16 speedInput, u8 accInput);
 void updateEndEffectorAngle() {
     double shoulderAngle = calculateRadByFeedback(servoFeedback[SHOULDER_DRIVING_SERVO_ID - 11].pos, SHOULDER_JOINT);
     double elbowAngle = calculateRadByFeedback(servoFeedback[ELBOW_SERVO_ID - 11].pos, ELBOW_JOINT);
@@ -63,7 +65,7 @@ void updateEndEffectorAngle() {
     double endEffectorAngle = M_PI - (shoulderAngle - elbowAngle); // 可能需要根据实际情况调整计算公式
 
     // 设置末端舵机的目标位置
-    RoArmM2_handJointCtrlRad(1, endEffectorAngle, 0.25, 1); // 可能需要调整速度和加速度参数
+    RoArmM2_handJointCtrlRad(0, endEffectorAngle, 0.25, 1); // 可能需要调整速度和加速度参数
 
     // 打印末端舵机的角度
     Serial.print("End Effector Angle: ");

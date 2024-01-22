@@ -12,10 +12,10 @@ uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 typedef struct hand_message {
   int T;
   byte dev;
-  float b;
-  float s;
-  float e;
-  float h;
+  float base;
+  float shoulder;
+  float elbow;
+  float hand;
   byte cmd;
   char megs[210];
 } hand_message;
@@ -84,22 +84,24 @@ float getControl[5];
 void send1(float arm0,float arm1,float arm2,float arm3){  //发送给机械臂
   handData.T =305;
   handData.dev = 0; // 设备编号0
-  handData.b = arm0;  //底座
-  handData.s = arm1;  //大臂
-  handData.e = arm2;  //小臂
-  handData.h = arm3;  //腕
+  handData.base = arm0;  //底座
+  handData.shoulder = arm1;  //大臂
+  handData.elbow = arm2;  //小臂
+  handData.hand = arm3;  //腕
   handData.cmd = 0;  //led灯是否打开
   strcpy(handData.megs, "move");
   esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &handData, sizeof(handData));
   if (result == ESP_OK) {
     Serial.print("Sent ok ");
-    Serial.print(arm0);
+    Serial.print(handData.T);
     Serial.print("  ");
-    Serial.print(arm1);
+    Serial.print(handData.base);
     Serial.print("  ");
-    Serial.print(arm2);
+    Serial.print(handData.shoulder);
     Serial.print("  ");
-    Serial.print(arm3);
+    Serial.print(handData.elbow);
+    Serial.print("  ");
+    Serial.print(handData.hand);
     Serial.println("  ");
   } else {
     Serial.println("Send Error");
@@ -117,7 +119,7 @@ void send2(float arm4) { //发送给机械爪
     Serial.println("Send Error");
   }  
 }
-float arc=4;//0.2秒移动最大角度为2度
+float arc=10;//0.2秒移动最大角度为2度
 float arcRate=arc*3.14/180; //0.2秒移动最大角度为2度，这个要根据实际调整
 void loop() {
   int yValueSw = digitalRead(VRSw);  // 读取第一个遥感模块的按钮情况
@@ -165,6 +167,6 @@ void loop() {
       Serial.println(arm[4]);
       send2(arm[4]);
     }
-    delay(500); //延时0.2秒，这个时候最多移动2度，然后再检测
+    delay(200); //延时0.2秒，这个时候最多移动2度，然后再检测
   }
 }

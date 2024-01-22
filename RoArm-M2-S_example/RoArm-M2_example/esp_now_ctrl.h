@@ -1,6 +1,7 @@
 const int MAX_FOLLOWERS = 10;  // Maximum number of follower devices
 
 typedef struct struct_message {
+  int T;
   byte devCode;
   float base;
   float shoulder;
