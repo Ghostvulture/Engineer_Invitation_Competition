@@ -97,6 +97,7 @@ void send1(float arm0,float arm1,float arm2,float arm3){  //发送给机械臂
   esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &handData, sizeof(handData));
   if (result == ESP_OK) {
     Serial.print("Sent ok ");
+    Serial.print(handData.megs);
     Serial.print(handData.T);
     Serial.print("  ");
     Serial.print(handData.base);
@@ -118,6 +119,7 @@ void send2(float arm4) {
   fingerData.arc = arm4;
   esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &fingerData, sizeof(fingerData));
   if (result == ESP_OK) {
+    Serial.print(fingerData.cmd);
     Serial.print(arm4);
     Serial.print("  ");
     Serial.println("Sent ok");
@@ -129,6 +131,10 @@ void send2(float arm4) {
 
 float arc=10;//delay秒内移动最大角度
 float arcRate=arc*3.14/180; //转换成弧度制
+//0124
+float targetArm[5] = {0, 0, 1.57, 3.14, 30};
+float increment = 0.1;
+
 void loop() {
   int yValueSw = digitalRead(VRSw);  // 读取第一个遥感模块的按钮情况
   
@@ -162,19 +168,29 @@ void loop() {
     // 判断是否所有遥感模块都有输入
     if(getControl[0] != 0 || getControl[1] != 0 || getControl[2] != 0  ) {
         for(int i = 0; i < 3; i++) {
-            arm[i] += getControl[i] * arcRate/10; //返回-10 .. 10之间
-            arm[i] = constrain(arm[i], armLimit[i][0], armLimit[i][1]);// 限制关节角度在设定范围内
+            targetarm[i] += getControl[i] * arcRate/10; //返回-10 .. 10之间
+            targetarm[i] = constrain(arm[i], armLimit[i][0], armLimit[i][1]);// 限制关节角度在设定范围内
         }
         //getControl[3]=constrain(1.57/2+(1.57-getControl[1]-getControl[2]), armLimit[3][0], armLimit[3][1]); // 腕要水平,腕=90度+(180度-大臂角度-小臂角度)
         send1(arm[0],arm[1],arm[2],arm[3]);
 
     }
     else if( getControl[3] != 0){
-      arm[4] += getControl[3] * arc/10;
-      arm[4] = constrain(arm[4], armLimit[4][0], armLimit[4][1]);// 限制关节角度在设定范围内
+      targetarm[4] += getControl[3] * arc/10;
+      targetarm[4] = constrain(arm[4], armLimit[4][0], armLimit[4][1]);// 限制关节角度在设定范围内
       Serial.println(arm[4]);
       send2(arm[4]);
     }
-    delay(200); //延时0.2秒，这个时候最多移动2度，然后再检测
+
+    for (int i = 0; i < 5; i++) {
+        if (arm[i] < targetArm[i]) {
+          arm[i] += min(increment, targetArm[i] - arm[i]);
+        } else if (arm[i] > targetArm[i]) {
+          arm[i] -= min(increment, arm[i] - targetArm[i]);
+        }
+        arm[i] = constrain(arm[i], armLimit[i][0], armLimit[i][1]); // 确保在安全范围内
+      }
+
+    delay(200); //延时
   }
 }

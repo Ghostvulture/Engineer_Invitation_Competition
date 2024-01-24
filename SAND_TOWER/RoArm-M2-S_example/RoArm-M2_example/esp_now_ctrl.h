@@ -121,11 +121,13 @@ void OnDataRecv(const unsigned char* mac, const unsigned char* incomingData, int
   }
 
   memcpy(&espNowMegsRecv, incomingData, sizeof(espNowMegsRecv));
-  if (InfoPrint == 1 && espNowMegsRecv.T == 305) {
-    Serial.print("Bytes received: ");Serial.println(len);
+  if (InfoPrint == 1) {
+    Serial.print("Bytes received: ");
+    Serial.println(len);
   }
 
-  DeserializationError err = deserializeJson(jsonCmdReceive, espNowMegsRecv.message);
+  if (strcmp(espNowMegsRecv.message, "move") == 0){
+    DeserializationError err = deserializeJson(jsonCmdReceive, espNowMegsRecv.message);
   switch(espNowMegsRecv.cmd) {
   case 0:
     RoArmM2_allJointAbsCtrl(espNowMegsRecv.base,
@@ -145,6 +147,11 @@ void OnDataRecv(const unsigned char* mac, const unsigned char* incomingData, int
   case 3:
     Serial.println(espNowMegsRecv.message);
   }
+  }
+  else{
+    Serial.println("not my messages.");
+  }
+  
 }
 
 
