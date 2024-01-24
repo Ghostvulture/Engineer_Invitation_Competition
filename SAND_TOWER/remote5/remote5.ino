@@ -8,6 +8,11 @@ Adafruit_ADS1115 ads;  // 默认I2C地址
 
 // 广播MAC地址
 uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+
+//从机MAC地址
+//uint8_t handAddress[] = {0x48, 0xE7, 0x29, 0xB5, 0xE9, 0x44};
+//uint8_t fingerAddress[] = {0x78, 0x21, 0x84, 0xC6, 0xDC, 0x40};//0124:add
+
 // 机械手发送数据
 typedef struct hand_message {
   int T;
@@ -32,7 +37,7 @@ finger_message fingerData;
 
 esp_now_peer_info_t peerInfo;  //espnow参数
 
-//把摇杆模拟信号改为-8至8的整数
+//把摇杆模拟信号改为-11至11的整数
 int mapToRange(int x, int in_min, int in_max,int mid) {
   int out_min=-11;  
   int out_max=11;  
@@ -94,9 +99,9 @@ void send1(float arm0,float arm1,float arm2,float arm3){  //发送给机械臂
   handData.hand = arm3;  //腕
   handData.cmd = 0;  //led灯是否打开
   strcpy(handData.megs, "move");
-  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &handData, sizeof(handData));
+  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &handData, sizeof(handData));//board->hand
   if (result == ESP_OK) {
-    Serial.print("Sent ok ");
+    Serial.print("Sent ok hand.");
     Serial.print(handData.megs);
     Serial.print(handData.T);
     Serial.print("  ");
@@ -117,19 +122,19 @@ void send1(float arm0,float arm1,float arm2,float arm3){  //发送给机械臂
 void send2(float arm4) { 
   strcpy(fingerData.cmd, "catch");
   fingerData.arc = arm4;
-  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &fingerData, sizeof(fingerData));
+  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t *) &fingerData, sizeof(fingerData));//board->finger
   if (result == ESP_OK) {
     Serial.print(fingerData.cmd);
     Serial.print(arm4);
     Serial.print("  ");
-    Serial.println("Sent ok");
+    Serial.println("Sent ok finger");
   } else {
     Serial.println("Send Error");
   }  
 }
 
 
-float arc=4;//delay秒内移动最大角度
+float arc=4;//delay秒内移动最大角度, --
 float arcRate=arc*3.14/180; //转换成弧度制
 void loop() {
   int yValueSw = digitalRead(VRSw);  // 读取第一个遥感模块的按钮情况
@@ -161,27 +166,29 @@ void loop() {
     Serial.print(getControl[3]);
     Serial.println("  ");*/
 
-    // 判断是否所有遥感模块都有输入
-    if(getControl[0] != 0 || getControl[1] != 0 || getControl[2] != 0  ) {
-        for(int i = 0; i < 3; i++) {
-            arm[i] += getControl[i] * arcRate/10; //返回-10 .. 10之间
-            arm[i] = constrain(arm[i], armLimit[i][0], armLimit[i][1]);// 限制关节角度在设定范围内
-        }
-        //getControl[3]=constrain(1.57/2+(1.57-getControl[1]-getControl[2]), armLimit[3][0], armLimit[3][1]); // 腕要水平,腕=90度+(180度-大臂角度-小臂角度)
-        send1(arm[0],arm[1],arm[2],arm[3]);
-
-    }
-    else if( getControl[3] != 0){
+    if( getControl[3] != 0){
       //arm[4] += getControl[3] * arc/10;
       if (getControl[3] < -5) {  // 假设阈值为-5，向左
       arm[4] = 30;
-    } else if (getControl[3] > 5) {  // 假设阈值为5，向右
+      } else if (getControl[3] > 5) {  // 假设阈值为5，向右
       arm[4] = 100;
-    }//0124
+      }//0124
       arm[4] = constrain(arm[4], armLimit[4][0], armLimit[4][1]);// 限制关节角度在设定范围内
       Serial.println(arm[4]);
       send2(arm[4]);
+        }
+
+    // 判断是否所有遥感模块都有输入
+    else if(getControl[0] != 0 || getControl[1] != 0 || getControl[2] != 0  ) {
+      for(int i = 0; i < 3; i++) {
+          arm[i] += getControl[i] * arcRate/10; //返回-10 .. 10之间
+          arm[i] = constrain(arm[i], armLimit[i][0], armLimit[i][1]);// 限制关节角度在设定范围内
+      }
+      //getControl[3]=constrain(1.57/2+(1.57-getControl[1]-getControl[2]), armLimit[3][0], armLimit[3][1]); // 腕要水平,腕=90度+(180度-大臂角度-小臂角度)
+      send1(arm[0],arm[1],arm[2],arm[3]);
+
     }
-    delay(50); //延时0.2秒，这个时候最多移动2度，然后再检测
+    
+    delay(50); //延时, --
   }
 }
