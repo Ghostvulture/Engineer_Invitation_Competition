@@ -85,7 +85,7 @@ float armLimit[5][2] = {
     {-3.14, 3.14},
     {-1.57, 1.57},
     {-1.11, 3.14},
-    {1.08, 3.14},
+    {0.4, 3.14},//1.08,3.14
     {30, 330}
 };
 float getControl[5];
@@ -171,7 +171,7 @@ void loop() {
       if (getControl[3] < -5) {  // 假设阈值为-5，向左
       arm[4] = 30;
       } else if (getControl[3] > 5) {  // 假设阈值为5，向右
-      arm[4] = 100;
+      arm[4] = 120;
       }//0124
       arm[4] = constrain(arm[4], armLimit[4][0], armLimit[4][1]);// 限制关节角度在设定范围内
       Serial.println(arm[4]);

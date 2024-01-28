@@ -62,7 +62,7 @@ void updateEndEffectorAngle() {
     double elbowAngle = calculateRadByFeedback(servoFeedback[ELBOW_SERVO_ID - 11].pos, ELBOW_JOINT);
 
     // 计算末端舵机的角度
-    double endEffectorAngle = M_PI + (-shoulderAngle - (elbowAngle - M_PI/2)); // 可能需要根据实际情况调整计算公式
+    double endEffectorAngle = M_PI/3 + (-shoulderAngle - (elbowAngle - M_PI/2)); // 可能需要根据实际情况调整计算公式
 
     // 设置末端舵机的目标位置
     RoArmM2_handJointCtrlRad(0, endEffectorAngle, 0, 0); // 可能需要调整速度和加速度参数
@@ -74,7 +74,7 @@ void updateEndEffectorAngle() {
     // Serial.println(elbowAngle * 180/M_PI);
 
     // Serial.print("End Effector Angle: ");
-    // Serial.println(endEffectorAngle * 180/M_PI);
+    // Serial.println(endEffectorAngle);//endEffectorAngle * 180/M_PI
 }
 
 // input the ID of the servo,
@@ -331,7 +331,7 @@ int RoArmM2_elbowJointCtrlRad(byte returnType, double radInput, u16 speedInput, 
 //           1: position ctrl. - cmd: input angle in radius.
 int RoArmM2_handJointCtrlRad(byte returnType, double radInput, u16 speedInput, u8 accInput) {
   s16 computePos = calculatePosByRad(radInput);
-  goalPos[4] = constrain(computePos, 700, 3396); 
+  goalPos[4] = constrain(computePos, 0, 3396); //700, 3396
 
   if (returnType) {
     st.WritePosEx(GRIPPER_SERVO_ID, goalPos[4], speedInput, accInput);
