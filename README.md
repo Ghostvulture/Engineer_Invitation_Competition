@@ -10,11 +10,14 @@ HKUSTGZ 2024
 
 ● 参数如下：
 
-![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/77226545-ff86-4b23-9f84-94e194344322/bc6b3877-fc47-4bc6-a29c-ac9336a3c24c/Untitled.png)
+<img src="images/para.png" width="400" height="600">
 
 
 
-链接：[履带](https://detail.tmall.com/item.htm?abbucket=14&id=743581875825&ns=1&spm=a21n57.1.0.0.4041523cM5mlwX)
+链接：[chassis](https://detail.tmall.com/item.htm?abbucket=14&id=743581875825&ns=1&spm=a21n57.1.0.0.4041523cM5mlwX)
+
+<img src="images/chassis.png" width="400" height="250">
+
 
 ---
 
@@ -26,29 +29,22 @@ HKUSTGZ 2024
     - 新增舵机，一个esp32单独控制，使其**始终保持水平**
     - 末端手爪与其他自由度保持原状，减少改装难度
 
-![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/77226545-ff86-4b23-9f84-94e194344322/9208dea1-b2da-42ec-8ee9-7dd08ff34a7f/Untitled.png)
+<img src="images/arm.png" width="400" height="400">
 
-![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/77226545-ff86-4b23-9f84-94e194344322/7eb43740-a70d-40ac-8153-efeda8d0ab99/Untitled.png)
 
-改装理想图
+- 爪子
 
-### 过程
+<img src="images/crawer.jpg" width="400" height="500">
 
-![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/77226545-ff86-4b23-9f84-94e194344322/e2fb834c-2286-4dca-98e6-68e48e4dde74/Untitled.png)
 
-- 保持平衡传感器，安装到舵机上
-- 金属件，用于固定与延长
-
-![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/77226545-ff86-4b23-9f84-94e194344322/1d69eb9a-669a-4962-bbcc-bc8a095c53a6/Untitled.jpeg)
-
-- 机械手爪
-- 以上**仅为参考，正在购买阶段**
 
 ---
 
 编辑于24.1.18 0:09 **根本不需要传感器这么麻烦！**
 
-![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/77226545-ff86-4b23-9f84-94e194344322/0f08fb1f-967b-454b-aebb-447fa57fdaed/Untitled.jpeg)
+
+<img src="images/compute.jpeg" width="400" height="250">
+
 
 如图，让腕部始终保持水平只是一个简单的几何题，通过shoulder轴和elbow轴的相对位置解算即可。
 
@@ -79,11 +75,21 @@ HKUSTGZ 2024
     - 录两段既定轨迹到两个文件中（接收旗帜，放下旗帜）
     - 记得加延时（最小值未知）
 
-![Untitled](https://prod-files-secure.s3.us-west-2.amazonaws.com/77226545-ff86-4b23-9f84-94e194344322/72a68f0a-f6fd-44d0-89f2-92c5463ad1ea/Untitled.png)
+
+<img src="images/flowgraph.png" width="600" height="210">
+
 
 *控制方式说明简图*
 
 **感悟：善用gpt！！！**
+
+---
+### update
+**发现esp32控制板上的串口和i2c全被用完啦！！！！（发出尖锐的爆鸣声）**
+
+**于是只好用esp-now通信方式，参考如下：**
+- [Arduino for ESP32-----ESP-NOW介绍及使用](https://www.waveshare.net/wiki/RoArm-M2-S_%E6%AD%A5%E9%AA%A4%E5%BD%95%E5%88%B6%E5%92%8C%E9%87%8D%E7%8E%B0)
+
 
 ---
 
@@ -93,7 +99,8 @@ HKUSTGZ 2024
 
 采用42步进电机控制，只需要完成旗帜交接，机械臂无需太多自由度。
 
-![9c77af7aa4b1ead86d58d028b4c6227.jpg](https://prod-files-secure.s3.us-west-2.amazonaws.com/77226545-ff86-4b23-9f84-94e194344322/5063e4fa-9a5a-4585-82d6-ff1b9e71a0db/9c77af7aa4b1ead86d58d028b4c6227.jpg)
+<img src="images/motor.jpg" width="300" height="450">
+
 
 配合机械爪。主控板与机械臂控制板通过串口通讯，控制42步进电机；主控板直接控制机械爪。
 
@@ -162,7 +169,8 @@ void arm_control (char msg)
 
 由于主控板上的计时器全部被占用，故此使用另一块F407VGT6的开发板控制。机械臂控制板打开USART1和TIM2_CH2。USART1接受主控板数据包，识别包头后解析第二位，选择开启或关闭计时器。开启计时器之后解析第三位数据，即决定转动方向。
 
-![电机参数](https://prod-files-secure.s3.us-west-2.amazonaws.com/77226545-ff86-4b23-9f84-94e194344322/5889b620-f619-466e-a241-16301dcb272f/Untitled.png)
+<img src="images/para2.png" width="500" height="450">
+
 
 ```c
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
@@ -186,8 +194,13 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 		HAL_UART_Receive_DMA(huart, control_message, 3);
 	}
 }
+
 ```
+---
 
 ## 机械爪
 
-未到，暂定为直接使用主控板中配套的控制代码。
+长这样：
+
+<img src="images/crawer.jpg" width="300" height="400">
+总线舵机
