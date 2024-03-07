@@ -143,7 +143,7 @@ void loop() {
   {
     Serial.println("000");
     //send({"T":305,"dev":0,"b":arm[0],"s":arm[1],"e":arm[2],"h":arm[3],"cmd":0,"megs":"move"}); //发送给机械臂
-    arm[0] = 0;
+    arm[0] = 0;//0
     arm[1] = 0;
     arm[2]=1.57;
     arm[3]=3.14;

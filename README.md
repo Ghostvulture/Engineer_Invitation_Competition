@@ -1,7 +1,31 @@
-# Engineer_Invitation_Competition
-HKUSTGZ 2024
-# 工程邀请赛
+# Engineer_Invitation_Competition工程邀请赛
+HKUSTGZ-HKUST 2024, HKUSTGZ部分
 
+文件结构
+```
+Engineer_Invitation_Competition/
+│
+├── README.md
+├── images/
+|
+├── SAND_TOWER/
+│   ├── RoArm-M2-S_Example/	#机械臂底层代码
+|	|	|——RoArm-M2_Module.h#主要改动这里
+|	|
+│   |── RoArm-M2-S_Python/	#网页指令式驱动代码（没用）
+│   ├── espnowRecv3/		#机械手（末端关节）驱动代码
+│   |── remote5/			#遥控器代码
+│   ├── sandArmControl/		#底盘代码
+│
+├── FLAG/
+│   ├── FlagArmControl/	#底盘代码
+│   |── arm_control/	#机械爪代码
+
+```
+**SAND_TOWER部分代码内有较为详细的注释。**
+
+
+# 实现技术细节
 # 底盘
 
 ● 履带底盘，无线遥控（PS2手柄），stm32f407，速度2m/s,买两个
@@ -90,6 +114,7 @@ HKUSTGZ 2024
 **于是只好用esp-now通信方式，参考如下：**
 - [Arduino for ESP32-----ESP-NOW介绍及使用](https://www.waveshare.net/wiki/RoArm-M2-S_%E6%AD%A5%E9%AA%A4%E5%BD%95%E5%88%B6%E5%92%8C%E9%87%8D%E7%8E%B0)
 
+主要就是把几个init和回调函数补全一下。esp-now之间的信息通过结构体相互传递。
 
 ---
 
@@ -203,4 +228,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 长这样：
 
 <img src="images/crawer.jpg" width="300" height="400">
+
 总线舵机
+
